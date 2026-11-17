@@ -1,4 +1,5 @@
 import logging
+import re
 
 # 1. CONFIGURACIÓN DEL LOGGING
 logging.basicConfig(
@@ -24,11 +25,15 @@ class Cliente(Entidad):
         super().__init__(id_cliente)
         self.nombre = nombre  # Activa @nombre.setter
         self.correo = correo  # Activa @correo.setter
-
+    
+    @property
+    def id_cliente(frozenset) -> int: # noqa
+        return self.id_entidad
+    
     @property
     def id_cliente(self) -> int:
         return self.id_entidad
-
+    
     @id_cliente.setter
     def id_cliente(self, valor: int):
         self.id_entidad = valor
@@ -37,7 +42,7 @@ class Cliente(Entidad):
     @property
     def nombre(self) -> str:
         return self._nombre
-
+    
     @nombre.setter
     def nombre(self, valor: str):
         if not isinstance(valor, str) or not valor.strip():
@@ -50,12 +55,12 @@ class Cliente(Entidad):
     @property
     def correo(self) -> str:
         return self._correo
-
+    
     @correo.setter
     def correo(self, valor: str):
         patron_email = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         if not isinstance(valor, str) or not re.match(patron_email, valor.strip()):
-            raise ErrorValidacion(f"Correo electrónico inválido: '{valor}'. Formato requerido: usuario@dominio.com")
+            raise ErrorValidacion(f"Correo electrónico inválido: '{valor}'. Formato requerido: usuario@dominio.co")
         self._correo = valor.strip()
 
     def set_correo(self, correo: str):
@@ -96,7 +101,7 @@ class Reserva:
         self.cliente = cliente
         self.servicio = servicio
         self.estado = "Pendiente"
-    
+   
     def procesar(self, duracion, estado_servicio="activo"):
         try:
             logging.info(f"Iniciando reserva de {self.cliente._nombre} para {self.servicio.nombre}")
@@ -138,11 +143,11 @@ if __name__ == "__main__":
     except ErrorValidacion as e:
         logging.error(f"Fallo al crear cliente: {e}")
         c2 = Cliente(2, "Pedro", "pedro@correo.com") # Corregido
-
+        
     s1 = ReservaSala(1, "Sala VIP")
     s2 = AlquilerEquipo(2, "Laptop Gamer")
     s3 = AsesoriaEspecializada(3, "Asesoría en Python")
-
+    
     # 1. Reserva Válida
     Reserva(c1, s1).procesar(2)
     # 2. Reserva Válida
@@ -163,5 +168,5 @@ if __name__ == "__main__":
     Reserva(c2, s3).procesar(4)
     # 10. Válida
     Reserva(c1, s1).procesar(8)
-
+    
     print("=== SIMULACIONES COMPLETADAS. REVISA EL ARCHIVO sistema_fj.log ===")
