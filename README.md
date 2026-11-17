@@ -24,9 +24,9 @@ Este proyecto consiste en el desarrollo de un sistema integral orientado a objet
 ## 👥 Integrantes del Equipo (5)
 *   **Yisenia Muriel Berrio** - Lógica base, POO y Excepciones.
 *   **Nietzsche Rousseau Restrepo P** - Validación de datos y Encapsulación.
-*   **Integrante 3** - Polimorfismo y Cálculo de Costos.
-*   **Integrante 4** - Documentación y Configuración de Logs.
-*   **Integrante 5** - Pruebas de Estabilidad y Simulaciones.
+*   **Yisenia Muriel y Nietzsche Restrepo.** - Polimorfismo y Cálculo de Costos.
+*   **Mateo Betancur** - Documentación y Configuración de Logs.
+*   **Yisenia Muriel y Nietzsche Restrepo** - Pruebas de Estabilidad y Simulaciones.
 *(Nota: Reemplaza los nombres de los integrantes 2 al 5 si tienes los nombres reales de tus compañeros).*
 
 ## ⚙️ Instrucciones de Ejecución
