@@ -27,10 +27,6 @@ class Cliente(Entidad):
         self.correo = correo  # Activa @correo.setter
     
     @property
-    def id_cliente(frozenset) -> int: # noqa
-        return self.id_entidad
-    
-    @property
     def id_cliente(self) -> int:
         return self.id_entidad
     
@@ -60,12 +56,8 @@ class Cliente(Entidad):
     def correo(self, valor: str):
         patron_email = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         if not isinstance(valor, str) or not re.match(patron_email, valor.strip()):
-            raise ErrorValidacion(f"Correo electrónico inválido: '{valor}'. Formato requerido: usuario@dominio.co")
+            raise ErrorValidacion(f"Correo electrónico inválido: '{valor}'. Formato requerido: usuario@dominio.com")
         self._correo = valor.strip()
-
-    def set_correo(self, correo: str):
-        """Método helper para compatibilidad previa."""
-        self.correo = correo
 
     def obtener_detalles(self):
         return f"Cliente ID: {self.id_cliente} | Nombre: {self.nombre} | Correo: {self.correo}"
@@ -75,7 +67,7 @@ class Servicio(Entidad):
     def __init__(self, id_servicio, nombre):
         super().__init__(id_servicio)
         self.nombre = nombre
-    def calcular_costo(self, duracion_horas, impuesto=0.0, descuento=0.0): # Método sobrecargado
+    def calcular_costo(self, duracion_horas, impuesto=0.0, descuento=0.0):
         raise NotImplementedError
     def obtener_detalles(self):
         return f"Servicio: {self.nombre}"
@@ -104,7 +96,7 @@ class Reserva:
    
     def procesar(self, duracion, estado_servicio="activo"):
         try:
-            logging.info(f"Iniciando reserva de {self.cliente._nombre} para {self.servicio.nombre}")
+            logging.info(f"Iniciando reserva de {self.cliente.nombre} para el servicio: {self.servicio.nombre}")
             
             if duracion <= 0:
                 raise ErrorValidacion("La duración debe ser mayor a 0 horas.")
@@ -113,7 +105,7 @@ class Reserva:
                 try:
                     raise ConnectionError("Error 504 - Timeout de red")
                 except ConnectionError as e:
-                    raise ServicioNoDisponible("El servicio no está disponible.") from e
+                    raise ServicioNoDisponible("El servicio no está disponible en este momento.") from e
             
             costo = self.servicio.calcular_costo(duracion, impuesto=0.19, descuento=5000)
             self.estado = "Confirmada"
@@ -132,41 +124,63 @@ class Reserva:
         finally:
             logging.info(f"Finalizado proceso de reserva. Estado final: {self.estado}\n")
 
-# 7. SIMULACIONES (10 OPERACIONES COMPLETAS)
+# 7. MENÚ INTERACTIVO PARA CAPTURAS REALES
 if __name__ == "__main__":
-    print("=== SISTEMA INTEGRAL SOFTWARE FJ ===\n")
-    
-    # Simulaciones (Válidas e Inválidas)
-    try:
-        c1 = Cliente(1, "Ana", "ana@correo.com")
-        c2 = Cliente(2, "Pedro", "pedro_correo.com") # Inválido
-    except ErrorValidacion as e:
-        logging.error(f"Fallo al crear cliente: {e}")
-        c2 = Cliente(2, "Pedro", "pedro@correo.com") # Corregido
-        
     s1 = ReservaSala(1, "Sala VIP")
     s2 = AlquilerEquipo(2, "Laptop Gamer")
     s3 = AsesoriaEspecializada(3, "Asesoría en Python")
     
-    # 1. Reserva Válida
-    Reserva(c1, s1).procesar(2)
-    # 2. Reserva Válida
-    Reserva(c1, s2).procesar(5)
-    # 3. Reserva Inválida (Duración 0)
-    Reserva(c2, s3).procesar(0)
-    # 4. Reserva Inválida (Servicio caído)
-    Reserva(c2, s1).procesar(3, "caido")
-    # 5. Reserva Válida
-    Reserva(c1, s3).procesar(1)
-    # 6. Reserva Válida
-    Reserva(c2, s2).procesar(10)
-    # 7. Inválida (Duración negativa)
-    Reserva(c1, s1).procesar(-2)
-    # 8. Inválida (Servicio caído)
-    Reserva(c1, s2).procesar(2, "caido")
-    # 9. Válida
-    Reserva(c2, s3).procesar(4)
-    # 10. Válida
-    Reserva(c1, s1).procesar(8)
-    
-    print("=== SIMULACIONES COMPLETADAS. REVISA EL ARCHIVO sistema_fj.log ===")
+    servicios_disponibles = {"1": s1, "2": s2, "3": s3}
+
+    while True:
+        print("\n=== SISTEMA INTEGRAL SOFTWARE FJ (MENÚ INTERACTIVO) ===")
+        print("1. Registrar nueva reserva (Ingresar datos desde cero)")
+        print("2. Salir")
+        
+        opcion = input("Seleccione una opción: ").strip()
+        
+        if opcion == "2":
+            print("Saliendo del sistema. ¡Hasta luego!")
+            break
+            
+        if opcion == "1":
+            try:
+                print("\n--- DATOS DEL CLIENTE ---")
+                id_c = int(input("Ingrese ID del cliente (número): "))
+                nom = input("Ingrese nombre del cliente: ")
+                email = input("Ingrese correo electrónico: ")
+                
+                # Creación del cliente (validará automáticamente con los setters)
+                cliente_actual = Cliente(id_c, nom, email)
+                
+                print("\n--- SELECCIONE UN SERVICIO ---")
+                print("1. Sala VIP ($50,000/hr)")
+                print("2. Laptop Gamer ($30,000/hr)")
+                print("3. Asesoría en Python ($80,000/hr)")
+                
+                s_op = input("Elija el servicio (1-3): ").strip()
+                if s_op not in servicios_disponibles:
+                    print("❌ Opción de servicio inválida.")
+                    continue
+                
+                servicio_actual = servicios_disponibles[s_op]
+                
+                dur = float(input("Ingrese la duración en horas: "))
+                
+                estado_serv = "activo"
+                simular_caida = input("¿Simular caída de red/servidor? (s/n): ").strip().lower()
+                if simular_caida == 's':
+                    estado_serv = "caido"
+                
+                print("\n--- PROCESANDO RESERVA ---")
+                reserva = Reserva(cliente_actual, servicio_actual)
+                reserva.procesar(dur, estado_serv)
+                
+            except ValueError:
+                print("❌ Error de formato: Ingrese valores numéricos válidos donde corresponda.")
+            except ErrorValidacion as e:
+                logging.error(f"Error de validación en consola: {e}")
+            except Exception as e:
+                logging.critical(f"Error inesperado: {e}")
+        else:
+            print("❌ Opción no válida. Intente de nuevo.")
